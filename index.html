@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Data to Table</title>
+    <style>
+        table{
+            width: 100%;
+        }
+        table,tr,th,td{
+            border: 3px solid red;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+    <form id="myForm">
+        <input type="text" id="name" placeholder="Name">
+        <input type="range" id="range" min="20" max="70">
+        <input type="password" id="password" placeholder="Password">
+
+        <input type="checkbox" id="checkboxA" value="A">A
+        <input type="checkbox" id="checkboxB" value="B">B
+        <input type="checkbox" id="checkboxC" value="C">C
+
+        <input type="radio" name="gender" id="male" value="Male">Male
+        <input type="radio" name="gender" id="female" value="Female">Female
+
+        <select id="select">
+            <option selected disabled>Choose any one</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+        </select>
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Range</th>
+                <th>Password</th>
+                <th>Checkboxes</th>
+                <th>Gender</th>
+                <th>Select</th>
+                <th id="act">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        let editingRow = null;
+
+        document.getElementById("myForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            if (editingRow) {
+                updateRow(editingRow);
+            } else {
+                addRow();
+            }
+            document.getElementById("myForm").reset();
+            editingRow = null;
+        });
+
+        function addRow() {
+            const name = document.getElementById("name").value;
+            const range = document.getElementById("range").value;
+            const password = document.getElementById("password").value;
+            const checkboxes = getCB().join(", ");
+            const gender = getSR("gender");
+            const select = document.getElementById("select").value;
+
+            const table = document.getElementById("dataTable").getElementsByTagName("tbody")[0];
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td>${name}</td>
+                <td>${range}</td>
+                <td>${password}</td>
+                <td>${checkboxes}</td>
+                <td>${gender}</td>
+                <td>${select}</td>
+                <td>
+                    <button class="edit-btn">Edit</button>
+                    <button class="delete-btn">Delete</button>
+                </td>
+            `;
+
+            newRow.querySelector(".edit-btn").addEventListener("click", () => editRow(newRow));
+            newRow.querySelector(".delete-btn").addEventListener("click", () => deleteRow(newRow));
+        }
+
+        function updateRow(row) {
+            const name = document.getElementById("name").value;
+            const range = document.getElementById("range").value;
+            const password = document.getElementById("password").value;
+            const checkboxes = getCB().join(", ");
+            const gender = getSR("gender");
+            const select = document.getElementById("select").value;
+
+            row.cells[0].innerText = name;
+            row.cells[1].innerText = range;
+            row.cells[2].innerText = password;
+            row.cells[3].innerText = checkboxes;
+            row.cells[4].innerText = gender;
+            row.cells[5].innerText = select;
+        }
+
+        function editRow(row) {
+            document.getElementById("name").value = row.cells[0].innerText;
+            document.getElementById("range").value = row.cells[1].innerText;
+            document.getElementById("password").value = row.cells[2].innerText;
+
+            const checkboxes = row.cells[3].innerText.split(", ");
+            document.getElementById("checkboxA").checked = checkboxes.includes("A");
+            document.getElementById("checkboxB").checked = checkboxes.includes("B");
+            document.getElementById("checkboxC").checked = checkboxes.includes("C");
+
+            const gender = row.cells[4].innerText;
+            document.getElementById(gender.toLowerCase()).checked = true;
+
+            document.getElementById("select").value = row.cells[5].innerText;
+
+            editingRow = row;
+        }
+
+        function deleteRow(row) {
+            row.parentNode.removeChild(row);
+        }
+
+        function getCB() {
+            const checkboxes = [];
+            if (document.getElementById("checkboxA").checked) checkboxes.push("A");
+            if (document.getElementById("checkboxB").checked) checkboxes.push("B");
+            if (document.getElementById("checkboxC").checked) checkboxes.push("C");
+            return checkboxes;
+        }
+
+        function getSR(name) {
+            const radios = document.getElementsByName(name);
+            for (let i = 0; i < radios.length; i++) {
+                if (radios[i].checked) {
+                    return radios[i].value;
+                }
+            }
+            return null;
+        }
+    </script>
+</body>
+</html>
